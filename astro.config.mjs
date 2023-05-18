@@ -9,7 +9,7 @@ import node from '@astrojs/node';
 export default defineConfig({
 	site: 'https://tema.roeegh.dev',
 	experimental: {
-		asserts: true
+		assets: true
 	},
 	integrations: [tailwind(), sitemap(), robotsTxt(), solidJs()],
 	output: 'server',
