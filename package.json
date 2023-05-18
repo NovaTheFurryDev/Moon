@@ -3,11 +3,12 @@
     "type": "module",
     "version": "0.0.1",
     "scripts": {
-        "start": "astro dev",
+        "dev": "astro dev",
         "check": "astro check",
+        "lint": "prettier --write  \"**/*.{js,jsx,ts,tsx,md,mdx,astro}\" && eslint --fix \"src/**/*.{js,ts,jsx,tsx,astro}\"",
         "preview": "astro preview",
-        "build": "npm run check && npm run lint && astro build",
-        "lint": "prettier --write  \"**/*.{js,jsx,ts,tsx,md,mdx,astro}\" && eslint --fix \"src/**/*.{js,ts,jsx,tsx,astro}\""
+        "start": "node ./dist/server/entry.mjs",
+        "build": "npm run check && npm run lint && astro build"
     },
     "prettier": {
         "plugins": [
