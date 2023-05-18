@@ -1,0 +1,95 @@
+{
+    "name": "tema",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "start": "astro dev",
+        "check": "astro check",
+        "preview": "astro preview",
+        "build": "npm run check && npm run lint && astro build",
+        "lint": "prettier --write  \"**/*.{js,jsx,ts,tsx,md,mdx,astro}\" && eslint --fix \"src/**/*.{js,ts,jsx,tsx,astro}\""
+    },
+    "prettier": {
+        "plugins": [
+            "./node_modules/prettier-plugin-astro",
+            "./node_modules/prettier-plugin-tailwindcss"
+        ],
+        "overrides": [
+            {
+                "files": "*.astro",
+                "options": {
+                    "parser": "astro"
+                }
+            }
+        ],
+        "astroAllowShorthand": false,
+        "bracketSameLine": true,
+        "tabWidth": 4,
+        "useTabs": true,
+        "singleQuote": true,
+        "jsxSingleQuote": true,
+        "trailingComma": "none",
+        "printWidth": 100,
+        "pluginSearchDirs": false,
+        "singleAttributePerLine": true
+    },
+    "eslintConfig": {
+        "extends": [
+            "plugin:astro/recommended"
+        ],
+        "parser": "@typescript-eslint/parser",
+        "parserOptions": {
+            "tsconfigRootDir": "__dirname",
+            "sourceType": "module",
+            "ecmaVersion": "latest"
+        },
+        "overrides": [
+            {
+                "files": [
+                    "*.astro"
+                ],
+                "parser": "astro-eslint-parser",
+                "parserOptions": {
+                    "parser": "@typescript-eslint/parser",
+                    "extraFileExtensions": [
+                        ".astro"
+                    ]
+                },
+                "rules": {
+                    "astro/no-set-html-directive": "error",
+                    "astro/no-set-text-directive": "error",
+                    "astro/no-unused-css-selector": "error",
+                    "astro/prefer-class-list-directive": "error",
+                    "astro/prefer-object-class-list": "error",
+                    "astro/prefer-split-class-list": "error",
+                    "astro/semi": [
+                        "error",
+                        "always"
+                    ],
+                    "semi": "off"
+                }
+            }
+        ]
+    },
+    "dependencies": {
+        "@astrojs/node": "^5.1.3",
+        "@astrojs/sitemap": "^1.3.1",
+        "@astrojs/solid-js": "^2.1.1",
+        "@astrojs/tailwind": "^3.1.2",
+        "astro": "^2.4.5",
+        "astro-robots-txt": "^0.5.0",
+        "astro-seo": "^0.7.2",
+        "solid-js": "^1.7.5",
+        "tailwindcss": "^3.3.2"
+    },
+    "devDependencies": {
+        "@tailwindcss/typography": "^0.5.9",
+        "@typescript-eslint/parser": "^5.59.6",
+        "eslint": "^8.40.0",
+        "eslint-plugin-astro": "^0.27.0",
+        "prettier": "^2.8.8",
+        "prettier-plugin-astro": "^0.8.1",
+        "prettier-plugin-tailwindcss": "^0.2.8",
+        "sharp": "^0.31.3"
+    }
+}

@@ -1,0 +1,65 @@
+---
+import { SEO } from 'astro-seo';
+
+export interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).toString();
+const resolvedImageWithDomain = new URL('/opengraph.jpg', Astro.site).toString();
+const makeTitle = title ? `${title} | Tema` : 'Tema';
+---
+
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<meta charset='UTF-8' />
+		<meta
+			name='viewport'
+			content='width=device-width'
+		/>
+		<link
+			rel='icon'
+			type='image/png'
+			href='/favicon.png'
+		/>
+		<meta
+			name='generator'
+			content={Astro.generator}
+		/>
+		<SEO
+			title={makeTitle}
+			description='Tema is a web based theme builder for Enmity and Vendetta'
+			canonical={canonicalURL}
+			twitter={{
+				card: 'summary_large_image',
+				creator: '@roeegh',
+				title: makeTitle,
+				image: resolvedImageWithDomain,
+				imageAlt: 'Tema Homepage Screenshot',
+				description: 'Tema is a web based theme builder for Enmity and Vendetta'
+			}}
+			openGraph={{
+				basic: {
+					title: makeTitle,
+					type: 'website',
+					image: resolvedImageWithDomain,
+					url: canonicalURL
+				},
+				image: {
+					alt: 'Tema Homepage Screenshot'
+				}
+			}}
+			surpressWarnings={true}
+		/>
+		<style is:global>
+			img {
+				content-visibility: auto;
+			}
+		</style>
+	</head>
+	<body class='bg-rosePineDawn-base'>
+		<slot />
+	</body>
+</html>
