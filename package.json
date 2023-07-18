@@ -9,6 +9,7 @@
         "preview": "astro preview",
         "start": "node ./dist/server/entry.mjs",
         "build": "npm run check && npm run lint && astro build"
+        "packageManager": "^pnpm@6.32.4"
     },
     "prettier": {
         "plugins": [
