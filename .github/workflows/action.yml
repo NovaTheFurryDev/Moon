@@ -11,7 +11,7 @@ inputs:
   node-version:
     description: "The node version to use"
     required: false
-    default: "16"
+    default: "18.17.0"
   package-manager:
     description: "If not automatically detectable, you may specify your preferred package manager"
     required: false
