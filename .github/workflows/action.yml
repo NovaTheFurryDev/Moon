@@ -1,39 +1,86 @@
-name: 'Setup Node.js environment'
-description: 'Setup a Node.js environment by adding problem matchers and optionally downloading and adding it to the PATH.'
-author: 'GitHub'
+name: "Astro Deploy"
+description: "A composite action that prepares your Astro site to be deployed to GitHub Pages"
+branding:
+  icon: "box"
+  color: "orange"
 inputs:
-  always-auth:
-    description: 'Set always-auth in npmrc.'
-    default: 'false'
+  path:
+    description: "Path of the directory containing your site"
+    required: false
+    default: "."
   node-version:
-    description: 'Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.'
-  node-version-file:
-    description: 'File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version, .tool-versions.'
-  architecture:
-    description: 'Target architecture for Node to use. Examples: x86, x64. Will use system architecture by default.'
-  check-latest:
-    description: 'Set this option if you want the action to check for the latest available version that satisfies the version spec.'
-    default: false
-  registry-url:
-    description: 'Optional registry to set up for auth. Will set the registry in a project level .npmrc and .yarnrc file, and set up auth to read in from env.NODE_AUTH_TOKEN.'
-  scope:
-    description: 'Optional scope for authenticating against scoped registries. Will fall back to the repository owner when using the GitHub Packages registry (https://npm.pkg.github.com/).'
-  token:
-    description: Used to pull node distributions from node-versions. Since there's a default, this is typically not supplied by the user. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
-    default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
-  cache:
-    description: 'Used to specify a package manager for caching in the default directory. Supported values: npm, yarn, pnpm.'
-  cache-dependency-path:
-    description: 'Used to specify the path to a dependency file: package-lock.json, yarn.lock, etc. Supports wildcards or a list of file names for caching multiple dependencies.'
-# TODO: add input to control forcing to pull from cloud or dist.
-#       escape valve for someone having issues or needing the absolute latest which isn't cached yet
-outputs:
-  cache-hit: 
-    description: 'A boolean value to indicate if a cache was hit.'
-  node-version:
-    description: 'The installed node version.'
+    description: "The node version to use"
+    required: false
+    default: "16"
+  package-manager:
+    description: "If not automatically detectable, you may specify your preferred package manager"
+    required: false
+    default: ""
+  resolve-dep-from-path:
+    description: "If the dependency file is located inside the folder specified by path" 
+    type: boolean
+    required: false
+    default: true 
+
 runs:
-  using: 'node16'
-  main: 'dist/setup/index.js'
-  post: 'dist/cache-save/index.js'
-  post-if: success()
+  using: composite
+  steps:
+    - name: Check lockfiles
+      shell: "bash"
+      env:
+        INPUT_PM: ${{ inputs.package-manager }}
+      run: |
+        len=`echo $INPUT_PM | wc -c`
+        if [ $len -gt 1 ]; then
+            echo "PACKAGE_MANAGER=$INPUT_PM" >> $GITHUB_ENV
+        elif [ $(find "." -name "pnpm-lock.yaml") ]; then
+            echo "PACKAGE_MANAGER=pnpm" >> $GITHUB_ENV
+            echo "LOCKFILE=pnpm-lock.yaml" >> $GITHUB_ENV
+        elif [ $(find "." -name "yarn.lock") ]; then 
+            echo "PACKAGE_MANAGER=yarn" >> $GITHUB_ENV
+            echo "LOCKFILE=yarn.lock" >> $GITHUB_ENV
+        elif [ $(find "." -name "package-lock.json") ]; then 
+            echo "PACKAGE_MANAGER=npm" >> $GITHUB_ENV
+            echo "LOCKFILE=package-lock.json" >> $GITHUB_ENV
+        else
+            echo "No lockfile found.
+        Please specify your preferred \"package-manager\" in the action configuration."
+            exit 1
+        fi
+    - name: Setup PNPM
+      if: ${{ env.PACKAGE_MANAGER == 'pnpm' }}
+      uses: pnpm/action-setup@v2.2.4
+      with:
+        version: 7.x.x
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      if: inputs.resolve-dep-from-path == true 
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ env.PACKAGE_MANAGER }}
+        cache-dependency-path: "${{ inputs.path }}/${{ env.LOCKFILE }}"
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      if: inputs.resolve-dep-from-path == false 
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ env.PACKAGE_MANAGER }}
+
+    - name: Install
+      shell: "bash"
+      run: |
+        cd ${{ inputs.path }}
+        $PACKAGE_MANAGER install
+
+    - name: Build
+      shell: "bash"
+      run: |
+        cd ${{ inputs.path }}
+        $PACKAGE_MANAGER run build
+
+    - name: Upload Pages Artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: "${{ inputs.path }}/dist/"
